@@ -1,0 +1,1 @@
+list = {'ftp_backup': 'ftp://dream.com.ua', 'lbook': 'F:/'}
