@@ -322,10 +322,15 @@ class BookShelfWindow(QtGui.QMainWindow):
 
             f = "\n".join(open(where2).readlines())
 
-            f = f.replace("{path}", basepath)
+	    #bp = basepath.replace(os.path.sep, "/")
+	    bp = os.path.normpath(basepath).replace(os.path.sep, "/")
+
+            f = f.replace("{path}", bp)
             f = f.replace("{volume}", "?")
             f = f.replace("{freespace}", "?")
             f = f.replace("{lastsync}", "?")
+
+	    #print f
 
             self.rightStack.setCurrentIndex(1)
             self.deviceWebView.setHtml(f)

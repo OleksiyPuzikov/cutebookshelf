@@ -113,7 +113,9 @@ if __name__ == "__main__":
 
     view = NewWebView()
 
-    where2 = "/local1/seq5/devices/lbook/index.html"
+    #where2 = "/local1/seq5/devices/lbook/index.html"
+
+    where2 = "D:/qbs/devices/lbook/index2.html"
 
     f = open(where2).readlines()
     ht = "\n".join(f)
