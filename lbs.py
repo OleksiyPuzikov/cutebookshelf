@@ -300,6 +300,11 @@ class BookShelfWindow(QtGui.QMainWindow):
     def moveEvent(self, event):
         storage.settings["x"] = event.pos().x()
         storage.settings["y"] = event.pos().y()
+
+	#print storage.settings
+
+	#print self.saveGeometry()
+
         event.ignore()
 
     def resizeEvent(self, event):
