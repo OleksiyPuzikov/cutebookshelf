@@ -61,12 +61,12 @@ h1 {
 <!--  <form id="form1" name="form1" method="post" action="">
     <input type="submit" name="synchronize" id="synchronize" value="Synchronize" />
   </form> -->
-   <button onclick="javascript:qhelper.onDoSomething('sync');">Synchronize</button>
+   <button onclick="javascript:qhelper.onDoSomething('sync/{volume}');">Synchronize</button>
 </div>
 
 <div id="apDiv3">
   <div>Mounted on: <strong>{volume}</strong></div>
-  <div>Free space: <strong>{freespace}</strong></div>
+  <div>Free space: <strong>{freespace} out from total {totalspace}</strong></div>
   <div>Last synchronized: <strong>{lastsync}</strong></div>
 </div>
 
