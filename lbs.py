@@ -16,6 +16,7 @@ import datetime
 import stat
 import shutil
 import inspect
+import time
 
 from PyQt4 import QtCore, QtGui
 
@@ -79,11 +80,17 @@ class BookShelfWindow(QtGui.QMainWindow):
         for (dirpath, dirnames, filenames) in os.walk(self.root):
             for dirname in dirnames:
                 fullpath = os.path.join(dirpath, dirname)
-                self.tree.addItemGroupIconName(self.groupLibrary, QtGui.QPixmap("pix/book.png"), self.tr(dirname), self.tr(fullpath))
+                self.tree.addItemGroupIconName(self.groupLibrary, QtGui.QPixmap("pix/book.png"), self.tr(dirname), self.tr(fullpath), "")
 
         group = self.tree.addGroupString("DEVICES")
-        self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/flash.png"), "lBook v3", "devices:/lbook")
-        self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/sync.png"), "FTP backup", "devices:/ftp")
+        for i in range(0,5):
+            device_name = storage.settings.get("device%d/name" % i, None)
+            if device_name != None:
+                device_type = storage.settings.get("device%d/type" % i, "default")
+#                device_path = storage.settings.get("device%d/path" % i, "~/")
+                self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/flash.png"), device_name, "devices:/%s" % device_type, str(i))
+#        self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/flash.png"), "lBook v3", "devices:/lbook")
+#        self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/sync.png"), "FTP backup", "devices:/ftp")
 
         group = self.tree.addGroupString("LIB.RUS.EC")
         self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/z_unknown.png"), "Start", "web:http://lib.rus.ec")
@@ -97,9 +104,6 @@ class BookShelfWindow(QtGui.QMainWindow):
 
         group = self.tree.addGroupString("FB2 SEARCH")
         self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/z_unknown.png"), "Start", "web:http://fb2search.com/")
-
-#        self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/z_unknown.png"), "Genres", "web:http://lib.rus.ec/g")
-#        self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/z_unknown.png"), "Authors", "web:http://lib.rus.ec/a")
 
         self.connect(self.tree, QtCore.SIGNAL("onItemSelected(QWidget)"), self.onTreeItemSelected)
 
@@ -130,7 +134,6 @@ class BookShelfWindow(QtGui.QMainWindow):
         self.connect(self.deviceWebView.helper, QtCore.SIGNAL("browserButtonPressed(QString)"), self.onBrowserButton)
         self.connect(self.deviceWebView, QtCore.SIGNAL("titleChanged(QString)"), self.onTitleChanged)
 
-#        self.deviceWebView.setUrl(QtCore.QUrl("about:blank"))
         self.page2Layout.addWidget(self.deviceWebView)
         self.rightStack.addWidget(self.page2)
         
@@ -140,7 +143,6 @@ class BookShelfWindow(QtGui.QMainWindow):
         self.page3Layout.setSpacing(0)
 
         self.storeWebView = NewWebView(self.page3)
-#        self.storeWebView.setUrl(QtCore.QUrl("about:blank"))
         self.page3Layout.addWidget(self.storeWebView)
         self.rightStack.addWidget(self.page3)
 
@@ -226,7 +228,13 @@ class BookShelfWindow(QtGui.QMainWindow):
         self.setWindowTitle(self.tr("%1 - %2").arg(product_name).arg(url))
 
     def onBrowserButton(self, button):
-        print "onBrowserButton", button
+#        print "onBrowserButton", button
+        command = str(button)
+        if command.startswith("sync/"):
+            print command
+            command = command.replace("sync/", "")
+            print command
+            
 
     def onOptionsAction(self):
 #        QtGui.QMessageBox.about(self, "About", "Cute Bookshelf\nby Alexei Puzikov")
@@ -300,11 +308,6 @@ class BookShelfWindow(QtGui.QMainWindow):
     def moveEvent(self, event):
         storage.settings["x"] = event.pos().x()
         storage.settings["y"] = event.pos().y()
-
-	#print storage.settings
-
-	#print self.saveGeometry()
-
         event.ignore()
 
     def resizeEvent(self, event):
@@ -313,27 +316,61 @@ class BookShelfWindow(QtGui.QMainWindow):
 #        self.grip1.adjustPosition()
         event.ignore()
 
+    def formatByteSize(self, bytes):
+        B = 1
+        KB = 1024 * B
+        MB = 1024 * KB
+        GB = 1024 * MB
+
+        if bytes > GB:
+            return '%0.3g GB' % (bytes/GB)
+        elif bytes > MB:
+            return '%0.3g MB' % (bytes/MB)
+        elif bytes > KB:
+            return '%0.3g KB' % (bytes/KB)
+        else:
+            return '%0.3g bytes' % bytes
+
     def onTreeItemSelected(self, item):
         where = str(item.text2)
+        try:
+            device_number = int(str(item.text3))
+        except:
+            device_number = -1
         if where.startswith("devices:"):
-            where2 = where.replace("devices:", "")
+            if device_number != -1:
+                where2 = where.replace("devices:", "")
 
-            where2 = os.path.normpath(os.path.sep.join([basepath, "devices", where2, "index.html"]))
+                where2 = os.path.normpath(os.path.sep.join([basepath, "devices", where2, "index.html"]))
 
-            f = "\n".join(open(where2).readlines())
+                device_name = storage.settings.get("device%d/name" % device_number, None)
+                device_type = storage.settings.get("device%d/type" % device_number, "default")
+                device_path = storage.settings.get("device%d/path" % device_number, "~/")
+                device_lastsync = storage.settings.get("device%d/lastsync" % device_number, "2009-10-11 12:34")
 
-	    #bp = basepath.replace(os.path.sep, "/")
-	    bp = os.path.normpath(basepath).replace(os.path.sep, "/")
+                now = datetime.datetime.fromtimestamp(time.time())
+                last = datetime.datetime.strptime(device_lastsync, '%Y-%m-%d %H:%M')
 
-            f = f.replace("{path}", bp)
-            f = f.replace("{volume}", "?")
-            f = f.replace("{freespace}", "?")
-            f = f.replace("{lastsync}", "?")
+                import freespace
 
-	    #print f
+                device_freespace, device_totalspace = freespace.freespace_ex(device_path)
 
-            self.rightStack.setCurrentIndex(1)
-            self.deviceWebView.setHtml(f)
+#                delta = now-last
+
+#                print now, device_lastsync
+
+#                print datetime.datetime.strftime('%Y-%m-%d')
+
+                f = "\n".join(open(where2).readlines())
+
+                f = f.replace("{path}", basepath)
+                f = f.replace("{volume}", device_path)
+                f = f.replace("{freespace}", self.formatByteSize(device_freespace))
+                f = f.replace("{totalspace}", self.formatByteSize(device_totalspace))
+                f = f.replace("{lastsync}", device_lastsync)
+
+                self.deviceWebView.setHtml(f)
+                self.rightStack.setCurrentIndex(1)
 
         elif where.startswith("web:"):
             self.rightStack.setCurrentIndex(2)

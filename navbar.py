@@ -17,7 +17,7 @@ class QfClickableLabel(QtGui.QLabel):
 
 class QfNavBarItem(QtGui.QWidget):
 
-    def __init__(self, icon = None, text = "", text2 = "", parent=None):
+    def __init__(self, icon = None, text = "", text2 = "", text3 = "", parent = None):
         QtGui.QWidget.__init__(self, parent)
 
         self.isSelected = False
@@ -31,6 +31,7 @@ class QfNavBarItem(QtGui.QWidget):
         self.labelText.setText(text)
 
         self.text2 = text2
+        self.text3 = text3
 
         self.labelText.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
         self.labelIcon.setFixedWidth(18)
@@ -99,8 +100,8 @@ class QfNavBarGroup(QtGui.QWidget):
         self.layout.addWidget(item)
         self.connect(item, QtCore.SIGNAL("selected(QWidget)"), self.onItemSelected)
 
-    def addItemIconName(self, icon, text, text2=None):
-        item = QfNavBarItem(icon, text, text2)
+    def addItemIconName(self, icon, text, text2=None, text3=None):
+        item = QfNavBarItem(icon, text, text2, text3)
         self.addItem(item)
         return item
     
@@ -182,8 +183,8 @@ class QfNavBar(QtGui.QWidget):
     def addItemNameGroupName(self, group, text):
         return group.addItemName(text)
 
-    def addItemGroupIconName(self, group, icon, text, text2=None):
-        return group.addItemIconName(icon, text, text2)
+    def addItemGroupIconName(self, group, icon, text, text2=None, text3=None):
+        return group.addItemIconName(icon, text, text2, text3)
 
 
     def paintEvent(self, event):
