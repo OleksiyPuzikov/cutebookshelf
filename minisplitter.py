@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 
 class  MiniSplitterHandle(QtGui.QSplitterHandle):
-    
+
     def __init__(self, orientation, parent):
         QtGui.QSplitterHandle.__init__(self, orientation, parent)
 
@@ -11,7 +11,7 @@ class  MiniSplitterHandle(QtGui.QSplitterHandle):
         self.setCursor(QtCore.Qt.SplitHCursor) # Qt.SizeBDiagCursor
 
     def resizeEvent(self, event):
-        
+
        if (self.orientation() == QtCore.Qt.Horizontal):
            self.setContentsMargins(2, 0, 2, 0)
        else:

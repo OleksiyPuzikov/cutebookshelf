@@ -35,6 +35,9 @@ class SyncEngine(QtCore.QObject):
 
         self.emit(QtCore.SIGNAL("started(QString)"), "Synchronizing to %s" % srcd)
 
+        srcd = os.path.normpath(srcd)+os.path.sep
+        destd = os.path.normpath(destd)+os.path.sep
+
         s = self.get_files(srcd)
         d = self.get_files(destd)
 
@@ -74,6 +77,7 @@ class SyncEngine(QtCore.QObject):
         cre_dirs = self.uniq(cre_dirs)
 
         # delete empty directories
+        # wouldn't work if directories are empty because of the way get_files works. will fix later.
         for dir in del_dirs:
             if destd+dir != destd:
                 if dir not in cre_dirs:

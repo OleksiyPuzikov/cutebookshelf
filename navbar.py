@@ -241,6 +241,10 @@ class QfNavBar(QtGui.QWidget):
     def onGroupExpanded(self, group) :
     	self.update()
 
+    def resizeEvent(self, event):
+        if hasattr(self, "grip"):
+            self.grip.adjustPosition()
+        event.ignore()
 
 if __name__ == "__main__":
 

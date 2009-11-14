@@ -3,7 +3,8 @@ from PyQt4 import QtCore, QtGui
 import sys
 import math
 
-from storage import data, header_sizes
+#from storage import data, header_sizes
+import storage
 
 #data = {'id1': {'rating': 5, 'genre': 'drama', 'author': 'John Grisham1', "checked":QtGui.QIcon.On},
 #        'id2': {'rating': 4, 'genre': 'drama', 'author': 'John Grisham2', "checked":QtGui.QIcon.Off},
@@ -21,7 +22,7 @@ class GraphDelegate(QtGui.QItemDelegate):
     
     def __init__(self, parent=None):
         QtGui.QItemDelegate.__init__(self,parent)
-        
+
         self.icon_on = QtGui.QIcon()
         self.icon_on.addPixmap(QtGui.QPixmap("pix/check_on.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.icon_on.addPixmap(QtGui.QPixmap("pix/check_off.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -62,7 +63,9 @@ class GraphDelegate(QtGui.QItemDelegate):
         if (option.state & QtGui.QStyle.State_Selected):
             painter.fillRect(option.rect, option.palette.highlight().color())
 
-        dt = data.get(idata)
+        dt = storage.data.get(idata)
+
+#        print idata, dt, dt['checked']
         
         self.icon_on.paint(painter, option.rect.left(), option.rect.top()+(option.rect.height()-16)/2, 16, 16, QtCore.Qt.AlignCenter, QtGui.QIcon.Normal, dt["checked"])
         
@@ -72,12 +75,12 @@ class GraphDelegate(QtGui.QItemDelegate):
         brush = option.palette.highlightedText() if (option.state & QtGui.QStyle.State_Selected) else self.COLOR #option.palette.text()
         brush2 = self.LCOLOR
         for x, c in enumerate(header_titles):
-            offs = sum(header_sizes[:x])+4 if x>0 else 18
+            offs = sum(storage.header_sizes[:x])+4 if x>0 else 18
             what = c.lower()
             if what == "rating":
                 painter.setRenderHint(QtGui.QPainter.Antialiasing)
                 y = option.rect.center().y()-self.SIZE/2.0+2
-                x = option.rect.left()+sum(header_sizes[:x])
+                x = option.rect.left()+sum(storage.header_sizes[:x])
                 painter.setPen(self.PEN)
                 painter.translate(x, y)
                 for x in range(0, 6):
@@ -89,7 +92,7 @@ class GraphDelegate(QtGui.QItemDelegate):
                         draw_circle()
                     painter.translate(self.SIZE, 0)
             else:                
-                woffs = option.rect.width()-header_sizes[x]+20 if x==0 else option.rect.width()-header_sizes[x]+4
+                woffs = option.rect.width()-storage.header_sizes[x]+20 if x==0 else option.rect.width()-storage.header_sizes[x]+4
                 style.drawItemText(painter, option.rect.adjusted(offs, 0, -woffs+offs, 0), align_flags, option.palette, True, dt.get(what,""), role)
         painter.restore()
 
@@ -111,10 +114,10 @@ class NewHeader(QtGui.QHeaderView):
         self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         
         self.resize(100, 20)
-        
+
         for x, c in enumerate(header_titles):
             self.model.setHeaderData(x, QtCore.Qt.Horizontal, QtCore.QVariant(self.tr(c)))
-            self.resizeSection(x, header_sizes[x])
+            self.resizeSection(x, storage.header_sizes[x])
         
         self.model.setHeaderData(x+1, QtCore.Qt.Horizontal, QtCore.QVariant(""))
                 
@@ -199,8 +202,8 @@ class NewListWithHeader(QtGui.QWidget):
 
 
     def itemDoubleClicked(self, item):
-        data[str(item.text())]["checked"] = QtGui.QIcon.On if data[str(item.text())]["checked"] == QtGui.QIcon.Off else QtGui.QIcon.Off
-        if data[str(item.text())]["checked"] == QtGui.QIcon.Off:
+        storage.data[str(item.text())]["checked"] = QtGui.QIcon.On if storage.data[str(item.text())]["checked"] == QtGui.QIcon.Off else QtGui.QIcon.Off
+        if storage.data[str(item.text())]["checked"] == QtGui.QIcon.Off:
             item.setCheckState(QtCore.Qt.Unchecked)
         else:
             item.setCheckState(QtCore.Qt.Checked)
@@ -208,9 +211,9 @@ class NewListWithHeader(QtGui.QWidget):
         self.list.repaint()
 
     def itemPressed(self, item):
-        if self.list.xx in range(sum(header_sizes[:-2]), sum(header_sizes[:-1])): # rating
+        if self.list.xx in range(sum(storage.header_sizes[:-2]), sum(storage.header_sizes[:-1])): # rating
             if item.isSelected():
-                data[str(item.text())]["rating"] = min(5, (self.list.xx-sum(header_sizes[:-2]))/16+1)
+                storage.data[str(item.text())]["rating"] = min(5, (self.list.xx-sum(storage.header_sizes[:-2]))/16+1)
                 self.list.repaint(self.list.geometry())
         if self.list.xx in range(0, 16):
             self.itemDoubleClicked(item)
@@ -220,7 +223,7 @@ class NewListWithHeader(QtGui.QWidget):
 #        if self.columnResizeTimerID == None:
 #            self.columnResizeTimerID = self.startTimer(0)
 
-        header_sizes[logicalIndex] = newSize
+        storage.header_sizes[logicalIndex] = newSize
         self.list.reset()
 
         # 050 402 35 24 TG mobile
