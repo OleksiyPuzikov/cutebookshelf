@@ -2,12 +2,12 @@
 
 # . save state for current tree item
 # . check if device exist
-# . save ** for books
-# . save read state for books
-# . bind synchronize button
-# . bind empty space
-# . import books from
-# . move devices settings to settings file
+# + save ** (stars) for books
+# + save read state for books
+# + bind synchronize button
+# + bind empty space
+# + import books from
+# + move devices settings to settings file
 
 import sys
 import os
@@ -29,7 +29,6 @@ from list import NewListWithHeader
 from grip import BetterGrip
 
 import storage
-from storage import data as data
 
 import sync
 
@@ -38,8 +37,6 @@ from normalize import *
 from animation import *
 
 basepath = os.path.join(os.getcwd(), os.path.dirname(inspect.getfile(sys._getframe(0)))) # this is where we come from
-
-#print basepath
 
 product_name = "Cute Bookshelf"
 
@@ -58,6 +55,9 @@ class BookShelfWindow(QtGui.QMainWindow):
 
         self.move(storage.settings.get("x", 0), storage.settings.get("y", 0))
         self.resize(storage.settings.get("w", 800), storage.settings.get("h", 600))
+
+        if storage.settings.get("maximized", False):
+            self.setWindowState(QtCore.Qt.WindowMaximized)
 
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setMargin(0)
@@ -210,8 +210,6 @@ class BookShelfWindow(QtGui.QMainWindow):
 
         self.setCentralWidget(self.centralWidget)
 
-#        self.setLayout(self.horizontalLayout)
-
         self.sync = sync.SyncEngine()
         self.connect(self.sync, QtCore.SIGNAL("started(QString)"), self.onSomethingStarted)
         self.connect(self.sync, QtCore.SIGNAL("progress(int,QString)"), self.onSomethingProgressing)
@@ -220,28 +218,45 @@ class BookShelfWindow(QtGui.QMainWindow):
         self.grip1 = BetterGrip(self.tree)
         self.grip1.coeffy = 0
         self.grip1.resize(13, 13)
+        self.tree.grip = self.grip1
 
-        self.connect(self.splitter, QtCore.SIGNAL("splitterMoved(int,int)"), self.onSplitterResized)
+        self.firstShow = True
+
 #        self.tree.setCurrentItem(itemBooks)
+
+    def showEvent(self, event):
+        if self.firstShow:
+            self.firstShow = False
+
+            for i in range(0,5):
+                dir_name = storage.settings.get("automergedir%d" % i, None)
+                if dir_name != None:
+                    self.autoMergeDir(dir_name)
+
+    def autoMergeDir(self, directory):
+        filetypes = parsers.keys()
+        directory = os.path.expanduser(os.path.expandvars(directory))
+
+        if os.path.isdir(directory):
+
+            for ft in filetypes:
+
+                files = [file for file in glob.glob(str(directory+"/*%s" % ft)) if os.path.isfile(file)]
+
+                for filename in files:
+                    self.onDownloadCompleted(self.tr(filename))
 
     def onTitleChanged(self, url):
         self.setWindowTitle(self.tr("%1 - %2").arg(product_name).arg(url))
 
     def onBrowserButton(self, button):
-#        print "onBrowserButton", button
         command = str(button)
         if command.startswith("sync/"):
-            print command
             command = command.replace("sync/", "")
-            print command
-            
+            self.sync.sync(self.root, command)
 
     def onOptionsAction(self):
-#        QtGui.QMessageBox.about(self, "About", "Cute Bookshelf\nby Alexei Puzikov")
         QtGui.QMessageBox.information(self, "Options", "Please edit %s manually" % storage.settingsPath)
-
-    def onSplitterResized(self, pos, index):
-        self.grip1.adjustPosition()
 
     def onDownloadCompleted(self, value):
         tempfilename = str(value)
@@ -306,14 +321,19 @@ class BookShelfWindow(QtGui.QMainWindow):
         self.progressBar.hide()
 
     def moveEvent(self, event):
-        storage.settings["x"] = event.pos().x()
-        storage.settings["y"] = event.pos().y()
+        fg = self.frameGeometry()
+#        storage.settings["x"] = event.pos().x()
+#        storage.settings["y"] = event.pos().y()
+        storage.settings["x"] = fg.x()
+        storage.settings["y"] = fg.y()
+
         event.ignore()
 
     def resizeEvent(self, event):
         storage.settings["w"] = event.size().width()
         storage.settings["h"] = event.size().height()
-#        self.grip1.adjustPosition()
+        storage.settings["maximized"] = self.windowState() == QtCore.Qt.WindowMaximized
+
         event.ignore()
 
     def formatByteSize(self, bytes):
@@ -406,7 +426,7 @@ class BookShelfWindow(QtGui.QMainWindow):
 
             (bauthor, btitle, bgenre) = parseFile(file)
 
-            a = {}
+            a = storage.data.get(file, {})
 
             a["name"] = btitle
             a["author"] = bauthor
@@ -414,25 +434,24 @@ class BookShelfWindow(QtGui.QMainWindow):
             a["size"] = self.tr(bsize)
             a["genre"] = self.tr(bgenre)
 #            a["path"] = self.tr(file)
-            a["rating"] = 0
-            a["checked"] = QtGui.QIcon.On
+            a["rating"] = a.get("rating", 0)
+            a["checked"] = a.get("checked", QtGui.QIcon.On)
 
-            data[file] = a
+            storage.data[file] = a
 
             QtGui.QListWidgetItem(self.tr(file), self.mainList.list)
 
 if __name__ == "__main__":
     storage.loadSettings()
     storage.loadData()
+
     app = QtGui.QApplication(sys.argv)
 
     window = BookShelfWindow()
     window.show()
-    window.grip1.adjustPosition() # hack
     window.raise_()
 
-#    window.onDownloadCompleted(window.tr("/tmp/Afanasev_Uyti_iz_lesa.144672.fb2.zip"))
-
     app.exec_()
+
     storage.saveData()
     storage.saveSettings()

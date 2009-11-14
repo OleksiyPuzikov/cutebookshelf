@@ -19,16 +19,22 @@ header_sizes = [300, 200, 50, 50, 100, 200, 0]
 def loadData():
     global data
 
-    try:
-        fh = open(storagePath, "r")
-        pickle.load(data, fh)
-        fh.close()
-    except:
-        pass
+#    try:
+    fh = open(storagePath, "rb")
+    data = pickle.load(fh)
+    fh.close()
+#    except:
+#        pass
+
+#    import pprint
+#    pprint.pprint(data)
 
 def saveData():
     global data
-    
+
+#    import pprint
+#    pprint.pprint(data)
+
     fh = open(storagePath, "w")
     pickle.dump(data, fh)
     fh.close()

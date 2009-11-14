@@ -5,7 +5,6 @@ import tempfile
 from PyQt4 import QtCore, QtGui, QtWebKit, QtNetwork
 
 import storage
-#from parsers import *
 
 class Helper(QtCore.QObject):
 
@@ -14,7 +13,6 @@ class Helper(QtCore.QObject):
 
     @QtCore.pyqtSignature("QString")
     def onDoSomething(self, what):
-#        print "onDoSomething", what
         self.emit(QtCore.SIGNAL("browserButtonPressed(QString)"), what)
 
 class NewWebView(QtWebKit.QWebView):
@@ -113,9 +111,7 @@ if __name__ == "__main__":
 
     view = NewWebView()
 
-    #where2 = "/local1/seq5/devices/lbook/index.html"
-
-    where2 = "D:/qbs/devices/lbook/index2.html"
+    where2 = "/local1/seq5/devices/lbook/index.html"
 
     f = open(where2).readlines()
     ht = "\n".join(f)

@@ -17,7 +17,12 @@ class BetterGrip(QtGui.QWidget):
         self.coeffy = 1
 
         self.resize(15, 15)
-        self.adjustPosition()
+
+    def minimumSizeHint(self):
+        return QtCore.QSize(13, 13)
+
+    def maximumSizeHint(self):
+        return QtCore.QSize(15, 15)
 
     def adjustPosition(self):
         self.move(self.parent().width()-self.width()-1, self.parent().height()-self.height()-1)
@@ -103,7 +108,7 @@ class BetterGrip(QtGui.QWidget):
 
         self.adjustPosition()
 
-class QermitWindow(QtGui.QWidget):
+class TestWindow(QtGui.QWidget):
 
     def __init__(self):
         QtGui.QWidget.__init__(self, None)
@@ -128,7 +133,7 @@ class QermitWindow(QtGui.QWidget):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
 
-    window = QermitWindow()
+    window = TestWindow()
     window.show()
 
     app.exec_()
