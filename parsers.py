@@ -7,6 +7,7 @@ def fb2parser_int(xmldoc):
     namespace = "{http://www.gribuser.ru/xml/fictionbook/2.0}"
 
     di = {}
+    
     descr = xmldoc.getchildren()[0].getchildren()[0]
     for child in descr.getchildren():
         t = child.tag.replace(namespace, "")
@@ -27,7 +28,7 @@ def fb2parser_int(xmldoc):
 
 def fb2parser(file):
     tree = ElementTree.parse(file)
-    return fb2parser_int(tree)
+    return fb2parser_int(tree.getroot())
 
 def fb2zipparser(file):
     zf = zipfile.ZipFile(file)
@@ -91,10 +92,10 @@ def parseFile(file):
     for ext in parsers:
         if file.endswith(ext):
             resparser = parsers[ext]
-    try:
-        (bauthor, btitle, bgenre) = resparser(file)
-    except:
-        (bauthor, btitle, bgenre) = defaultparser(file)
+    # try:
+    (bauthor, btitle, bgenre) = resparser(file)
+    # except:
+        # (bauthor, btitle, bgenre) = defaultparser(file)
 
     return (bauthor, btitle, bgenre)
 
