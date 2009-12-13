@@ -92,10 +92,10 @@ def parseFile(file):
     for ext in parsers:
         if file.endswith(ext):
             resparser = parsers[ext]
-    # try:
-    (bauthor, btitle, bgenre) = resparser(file)
-    # except:
-        # (bauthor, btitle, bgenre) = defaultparser(file)
+    try:
+    	(bauthor, btitle, bgenre) = resparser(file)
+    except:
+        (bauthor, btitle, bgenre) = defaultparser(file)
 
     return (bauthor, btitle, bgenre)
 
