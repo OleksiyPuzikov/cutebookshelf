@@ -1,16 +1,9 @@
-from PyQt4 import QtCore, QtGui
-#from PyQt4 import Qt as Qt4
 import sys
 import math
 
-#from storage import data, header_sizes
-import storage
+from PyQt4 import QtCore, QtGui
 
-#data = {'id1': {'rating': 5, 'genre': 'drama', 'author': 'John Grisham1', "checked":QtGui.QIcon.On},
-#        'id2': {'rating': 4, 'genre': 'drama', 'author': 'John Grisham2', "checked":QtGui.QIcon.Off},
-#        'id3': {'rating': 3, 'genre': 'fiction', 'author': 'John Grisham2', "checked":QtGui.QIcon.On},
-#        'id4': {'rating': 2, 'genre': 'drama', 'author': 'John Grisham2', "checked":QtGui.QIcon.Off}
-#        }
+import storage
         
 header_titles = [ "Name", "Author", "Date", "Size", "Genre", "Rating" ]
         
@@ -64,9 +57,7 @@ class GraphDelegate(QtGui.QItemDelegate):
             painter.fillRect(option.rect, option.palette.highlight().color())
 
         dt = storage.data.get(idata)
-
-#        print idata, dt, dt['checked']
-        
+      
         self.icon_on.paint(painter, option.rect.left(), option.rect.top()+(option.rect.height()-16)/2, 16, 16, QtCore.Qt.AlignCenter, QtGui.QIcon.Normal, dt["checked"])
         
         style = QtGui.QApplication.style()
@@ -180,7 +171,6 @@ class NewListWithHeader(QtGui.QWidget):
         self.setLayout(self.layoutV)
 
         self.connect(self.header, QtCore.SIGNAL("sectionResized(int, int, int)"), self.sectionResized)
-#        self.header.dosomething = self.resized2
 
         self.connect(self.list, QtCore.SIGNAL('itemPressed(QListWidgetItem*)'), self.itemPressed)
 
@@ -220,13 +210,8 @@ class NewListWithHeader(QtGui.QWidget):
 
     def sectionResized(self, logicalIndex, oldSize, newSize):
 
-#        if self.columnResizeTimerID == None:
-#            self.columnResizeTimerID = self.startTimer(0)
-
         storage.header_sizes[logicalIndex] = newSize
         self.list.reset()
-
-        # 050 402 35 24 TG mobile
 
     def timerEvent(self, event):
         if event.timerId() == self.columnResizeTimerID:

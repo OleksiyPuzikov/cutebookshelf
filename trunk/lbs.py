@@ -87,10 +87,7 @@ class BookShelfWindow(QtGui.QMainWindow):
             device_name = storage.settings.get("device%d/name" % i, None)
             if device_name != None:
                 device_type = storage.settings.get("device%d/type" % i, "default")
-#                device_path = storage.settings.get("device%d/path" % i, "~/")
                 self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/flash.png"), device_name, "devices:/%s" % device_type, str(i))
-#        self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/flash.png"), "lBook v3", "devices:/lbook")
-#        self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/sync.png"), "FTP backup", "devices:/ftp")
 
         group = self.tree.addGroupString("LIB.RUS.EC")
         self.tree.addItemGroupIconName(group, QtGui.QPixmap("pix/z_unknown.png"), "Start", "web:http://lib.rus.ec")
@@ -297,33 +294,27 @@ class BookShelfWindow(QtGui.QMainWindow):
             if self.animation.running():
                 self.animation.kill()
 
-#        bgcolor = self.palette().color(QtGui.QPalette.Window)
         bgcolor = self.tree.colorBackground
 
         self.animation = FadeSwitch(lbl, bgcolor)
         self.animation.start()
 
     def onSomethingStarted(self, value):
-#        print "onSomethingStarted", value
         self.lblProgress.show()
         self.progressBar.show()
         self.lblProgress.setText(value)
 
     def onSomethingProgressing(self, progress, value):
-#        print "onSomethingProgressing", progress, value
         self.lblProgress.setText(value)
         self.progressBar.setValue(progress)
 
     def onSomethingFinished(self, value):
-#        print "onSomethingFinished", value
         self.lblProgress.setText(value)
         self.lblProgress.hide()
         self.progressBar.hide()
 
     def moveEvent(self, event):
         fg = self.frameGeometry()
-#        storage.settings["x"] = event.pos().x()
-#        storage.settings["y"] = event.pos().y()
         storage.settings["x"] = fg.x()
         storage.settings["y"] = fg.y()
 
